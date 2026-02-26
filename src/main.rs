@@ -56,7 +56,8 @@ fn commit(args: &[String]) {
 }
 
 fn pull_request(args: &[String]) {
-    git_pull();
+    // TODO: Doesn't matter if git pull fails when no remote
+    //git_pull();
     let branch = get_current_branch();
 
     if branch == "main" || branch == "master" {
