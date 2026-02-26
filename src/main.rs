@@ -76,11 +76,11 @@ fn pull_request(args: &[String]) {
             .arg(&branch),
     );
 
-    let title = if args.is_empty() {
-        branch.clone()
-    } else {
-        args.join(" ")
-    };
+    //let title = if args.is_empty() {
+    //    branch.clone()
+    //} else {
+    //    args.join(" ")
+    //};
 
     let repo_url = get_pr_url(&branch);
 
