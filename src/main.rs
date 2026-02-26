@@ -56,7 +56,8 @@ fn commit(args: &[String]) {
 }
 
 fn pull_request(args: &[String]) {
-    git_pull();
+    // TODO: Doesn't matter if git pull fails when no remote
+    //git_pull();
     let branch = get_current_branch();
 
     if branch == "main" || branch == "master" {
@@ -76,11 +77,11 @@ fn pull_request(args: &[String]) {
             .arg(&branch),
     );
 
-    let title = if args.is_empty() {
-        branch.clone()
-    } else {
-        args.join(" ")
-    };
+    //let title = if args.is_empty() {
+    //    branch.clone()
+    //} else {
+    //    args.join(" ")
+    //};
 
     let repo_url = get_pr_url(&branch);
 
@@ -100,16 +101,16 @@ fn get_current_branch() -> String {
     branch
 }
 
-// TODO: Generate pr url
 fn get_pr_url(branch: &String) -> String {
     let output = run_command(Command::new("git").args(["remote", "get-url", "origin"]));
     let raw = String::from_utf8_lossy(&output.stdout).trim().to_string();
 
-    println!("{}", raw);
-    let url = format!(
-        "https://github.com/cameronpyne-smith/git_help/pull/new/{}",
-        branch
-    );
+    let base_url = raw
+        .replace("git@github.com:", "https://github.com/")
+        .trim_end_matches(".git")
+        .to_string();
+
+    let url = format!("{}/pull/new/{}", base_url, branch);
 
     url
 }
