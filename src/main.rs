@@ -35,9 +35,9 @@ fn print_usage() {
     eprintln!("  pr [title]      Create a pull request for the current branch and open it");
 }
 
-//fn git_pull() {
-//    run_command(Command::new("git").arg("pull"));
-//}
+fn git_pull() {
+    run_command(Command::new("git").arg("pull"));
+}
 
 fn git_add_all() {
     run_command(Command::new("git").args(["add", "."]));
@@ -119,6 +119,7 @@ fn pull_request_ai() {
         exit(1);
     }
 
+    git_pull();
     commit_ai_message();
     run_command(
         Command::new("git")
