@@ -1,3 +1,5 @@
+use dotenv::dotenv;
+
 pub mod google;
 pub mod openai;
 
@@ -6,6 +8,7 @@ pub trait CommitMessageGenerator {
 }
 
 pub fn get_provider() -> Box<dyn CommitMessageGenerator> {
+    dotenv().ok();
     let provider = std::env::var("AI_PROVIDER").unwrap_or_else(|_| "google".to_string());
 
     match provider.as_str() {
