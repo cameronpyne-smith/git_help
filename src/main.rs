@@ -119,6 +119,7 @@ fn pull_request_ai() {
         exit(1);
     }
 
+    commit_ai_message();
     run_command(
         Command::new("git")
             .arg("push")
@@ -152,6 +153,7 @@ fn pull_request_ai() {
         .post(&url)
         .header("Authorization", format!("Bearer {}", &github_token))
         .header("Accept", "application/vnd.github+json")
+        .header("User-Agent", "git_help")
         .json(&payload)
         .send()
         .unwrap_or_else(|e| {
@@ -159,7 +161,18 @@ fn pull_request_ai() {
             exit(1);
         });
 
-    let json: serde_json::Value = resp.json().unwrap();
+    let status = resp.status();
+    let body = resp.text().unwrap_or_default();
+
+    if !status.is_success() {
+        eprintln!("GitHub API error ({}): {}", status, body);
+        exit(1);
+    }
+
+    let json: serde_json::Value = serde_json::from_str(&body).unwrap_or_else(|e| {
+        eprintln!("Failed to parse response: {}\nBody: {}", e, body);
+        exit(1);
+    });
 
     if let Some(pr_url) = json["html_url"].as_str() {
         println!("Pull request created: {}", pr_url);
