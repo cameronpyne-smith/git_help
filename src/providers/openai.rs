@@ -48,8 +48,6 @@ impl CommitMessageGenerator for OpenAIProvider {
 
         let json: serde_json::Value = resp.json().unwrap();
 
-        println!("open: {}", &json);
-
         json["choices"][0]["message"]["content"]
             .as_str()
             .unwrap_or("chore: update files")
