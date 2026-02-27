@@ -1,10 +1,10 @@
-mod models;
+mod providers;
 
 use std::env;
 use std::process::exit;
 use std::process::{Command, Output};
 
-use crate::models::gemini::generate_commit_message;
+use crate::providers::get_provider;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -71,7 +71,8 @@ fn commit(args: &[String]) {
 
 fn commit_ai_message() {
     let diff = git_diff();
-    let message = generate_commit_message(&diff);
+    let provider = get_provider();
+    let message = provider.generate_commit_message(&diff);
     git_add_all();
     git_commit(&message);
 }
