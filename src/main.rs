@@ -18,6 +18,7 @@ fn main() {
         "commit" => commit(&args[2..]),
         "commit-ai" => commit_ai_message(),
         "pr" => pull_request(),
+        "pr-ai" => pull_request_ai(),
         _ => {
             eprintln!("Unknown command: {}", args[1]);
             print_usage();
@@ -105,16 +106,81 @@ fn pull_request() {
     open_url(&repo_url);
 }
 
-fn get_current_branch() -> String {
-    let output = run_command(Command::new("git").args(["branch", "--show-current"]));
-    let branch = String::from_utf8_lossy(&output.stdout).trim().to_string();
+fn pull_request_ai() {
+    dotenv::dotenv().ok();
 
-    if branch.is_empty() {
-        eprintln!("Error: HEAD is detached (not on any branch)");
+    let branch = get_current_branch();
+
+    if branch == "main" || branch == "master" {
+        eprintln!(
+            "Error: you are on the '{}' branch. Switch to a feature branch first.",
+            branch
+        );
         exit(1);
     }
 
-    branch
+    run_command(
+        Command::new("git")
+            .arg("push")
+            .arg("-u")
+            .arg("origin")
+            .arg(&branch),
+    );
+
+    let github_token = env::var("GITHUB_TOKEN").unwrap_or_else(|_| {
+        eprintln!("Error: GITHUB_TOKEN environment variable not set.");
+        eprintln!("Create a PAT at https://github.com/settings/tokens");
+        exit(1);
+    });
+
+    let repo = get_github_repo();
+
+    let title = "Title";
+    let body = "Body";
+
+    let client = reqwest::blocking::Client::new();
+    let url = format!("https://api.github.com/repos/{}/pulls", repo);
+
+    let payload = serde_json::json!({
+        "title": title,
+        "body": body,
+        "head": branch,
+        "base": "main" // TODO: might not be main? Git command or setting
+    });
+
+    let resp = client
+        .post(&url)
+        .header("Authorization", format!("Bearer {}", &github_token))
+        .header("Accept", "application/vnd.github+json")
+        .json(&payload)
+        .send()
+        .unwrap_or_else(|e| {
+            eprintln!("GitHub API request failed: {}", e);
+            exit(1);
+        });
+
+    let json: serde_json::Value = resp.json().unwrap();
+
+    if let Some(pr_url) = json["html_url"].as_str() {
+        println!("Pull request created: {}", pr_url);
+        open_url(pr_url);
+    } else {
+        eprintln!(
+            "Failed to create PR: {}",
+            serde_json::to_string_pretty(&json).unwrap()
+        );
+        exit(1);
+    }
+}
+
+fn get_github_repo() -> String {
+    let output = run_command(Command::new("git").args(["remote", "get-url", "origin"]));
+    let raw = String::from_utf8_lossy(&output.stdout).trim().to_string();
+
+    raw.replace("git@github.com:", "")
+        .replace("https://github.com/", "")
+        .trim_end_matches(".git")
+        .to_string()
 }
 
 fn get_pr_url(branch: &String) -> String {
@@ -129,6 +195,18 @@ fn get_pr_url(branch: &String) -> String {
     let url = format!("{}/pull/new/{}", base_url, branch);
 
     url
+}
+
+fn get_current_branch() -> String {
+    let output = run_command(Command::new("git").args(["branch", "--show-current"]));
+    let branch = String::from_utf8_lossy(&output.stdout).trim().to_string();
+
+    if branch.is_empty() {
+        eprintln!("Error: HEAD is detached (not on any branch)");
+        exit(1);
+    }
+
+    branch
 }
 
 fn open_url(url: &str) {
