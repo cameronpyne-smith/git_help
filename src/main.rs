@@ -1,6 +1,10 @@
+mod models;
+
 use std::env;
 use std::process::exit;
 use std::process::{Command, Output};
+
+use crate::models::gemini::generate_commit_message;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -12,6 +16,7 @@ fn main() {
 
     match args[1].as_str() {
         "commit" => commit(&args[2..]),
+        "commit-ai" => commit_ai_message(),
         "pr" => pull_request(&args[2..]),
         _ => {
             eprintln!("Unknown command: {}", args[1]);
@@ -37,6 +42,15 @@ fn git_add_all() {
     run_command(Command::new("git").args(["add", "."]));
 }
 
+fn git_diff() -> String {
+    let output = run_command(Command::new("git").arg("diff"));
+    String::from_utf8_lossy(&output.stdout).to_string()
+}
+
+fn git_diff_cached() {
+    run_command(Command::new("git").args(["diff", "--cached"]));
+}
+
 fn git_commit(message: &String) {
     run_command(Command::new("git").args(["commit", "-am", &message]));
     println!("Committed with message: {}", message);
@@ -52,6 +66,13 @@ fn commit(args: &[String]) {
     git_add_all();
 
     let message = args.join(" ");
+    git_commit(&message);
+}
+
+fn commit_ai_message() {
+    let diff = git_diff();
+    let message = generate_commit_message(&diff);
+    git_add_all();
     git_commit(&message);
 }
 
@@ -115,7 +136,6 @@ fn get_pr_url(branch: &String) -> String {
     url
 }
 
-/// Open a URL in the default browser.
 fn open_url(url: &str) {
     #[cfg(target_os = "windows")]
     let result = Command::new("cmd").args(["/C", "start", url]).status();
