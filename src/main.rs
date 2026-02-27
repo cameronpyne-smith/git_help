@@ -17,7 +17,7 @@ fn main() {
     match args[1].as_str() {
         "commit" => commit(&args[2..]),
         "commit-ai" => commit_ai_message(),
-        "pr" => pull_request(&args[2..]),
+        "pr" => pull_request(),
         _ => {
             eprintln!("Unknown command: {}", args[1]);
             print_usage();
@@ -34,9 +34,9 @@ fn print_usage() {
     eprintln!("  pr [title]      Create a pull request for the current branch and open it");
 }
 
-fn git_pull() {
-    run_command(Command::new("git").arg("pull"));
-}
+//fn git_pull() {
+//    run_command(Command::new("git").arg("pull"));
+//}
 
 fn git_add_all() {
     run_command(Command::new("git").args(["add", "."]));
@@ -47,9 +47,9 @@ fn git_diff() -> String {
     String::from_utf8_lossy(&output.stdout).to_string()
 }
 
-fn git_diff_cached() {
-    run_command(Command::new("git").args(["diff", "--cached"]));
-}
+//fn git_diff_cached() {
+//    run_command(Command::new("git").args(["diff", "--cached"]));
+//}
 
 fn git_commit(message: &String) {
     run_command(Command::new("git").args(["commit", "-am", &message]));
@@ -76,7 +76,7 @@ fn commit_ai_message() {
     git_commit(&message);
 }
 
-fn pull_request(args: &[String]) {
+fn pull_request() {
     // TODO: Doesn't matter if git pull fails when no remote
     //git_pull();
     let branch = get_current_branch();
@@ -97,12 +97,6 @@ fn pull_request(args: &[String]) {
             .arg("origin")
             .arg(&branch),
     );
-
-    //let title = if args.is_empty() {
-    //    branch.clone()
-    //} else {
-    //    args.join(" ")
-    //};
 
     let repo_url = get_pr_url(&branch);
 

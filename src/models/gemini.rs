@@ -44,8 +44,6 @@ pub fn generate_commit_message(diff_context: &str) -> String {
 
     let json: serde_json::Value = resp.json().unwrap();
 
-    eprintln!("{}", serde_json::to_string_pretty(&json).unwrap());
-
     json["candidates"][0]["content"]["parts"][0]["text"]
         .as_str()
         .unwrap_or("chore: update files")
