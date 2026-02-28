@@ -7,6 +7,7 @@ use super::CommitMessageGenerator;
 pub struct GoogleProvider;
 
 impl CommitMessageGenerator for GoogleProvider {
+    // TODO: Allow addition to the prompts from config
     fn generate_commit_message(&self, diff_context: &str) -> String {
         let prompt = format!(
             "Generate a concise conventional commit message for these changes.\n\
