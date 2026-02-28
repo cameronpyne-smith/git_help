@@ -5,6 +5,8 @@ pub mod openai;
 
 pub trait CommitMessageGenerator {
     fn generate_commit_message(&self, diff_context: &str) -> String;
+    fn generate_pr_title(&self, commit_log: &str) -> String;
+    fn generate_pr_body(&self, commit_log: &str) -> String;
 }
 
 pub fn get_provider() -> Box<dyn CommitMessageGenerator> {

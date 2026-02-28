@@ -48,9 +48,11 @@ fn git_diff() -> String {
     String::from_utf8_lossy(&output.stdout).to_string()
 }
 
-//fn git_diff_cached() {
-//    run_command(Command::new("git").args(["diff", "--cached"]));
-//}
+fn git_diff_origin_main() -> String {
+    // TODO: might not be main, should come from settings or git command
+    let output = run_command(Command::new("git").args(["diff", "origin/main"]));
+    String::from_utf8_lossy(&output.stdout).trim().to_string()
+}
 
 fn git_commit(message: &String) {
     run_command(Command::new("git").args(["commit", "-am", &message]));
@@ -119,7 +121,9 @@ fn pull_request_ai() {
         exit(1);
     }
 
-    git_pull();
+    // TODO: Doesn't matter if git pull fails when no remote
+    //git_pull();
+    // TODO: Only commit if git diff is empty
     commit_ai_message();
     run_command(
         Command::new("git")
@@ -137,8 +141,18 @@ fn pull_request_ai() {
 
     let repo = get_github_repo();
 
-    let title = "Title";
-    let body = "Body";
+    let all_changes = git_diff_origin_main();
+    if all_changes.is_empty() {
+        eprintln!("No changes from origin/main");
+        exit(1);
+    }
+
+    let provider = get_provider();
+    let title = provider.generate_pr_title(&all_changes);
+    let body = provider.generate_pr_body(&all_changes);
+
+    println!("PR Title: {}", title);
+    println!("PR Body:\n{}", body);
 
     let client = reqwest::blocking::Client::new();
     let url = format!("https://api.github.com/repos/{}/pulls", repo);
