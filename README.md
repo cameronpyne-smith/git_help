@@ -1,6 +1,7 @@
 # git_help
 
 Never write a commit message again!
+
 Tired of writing pull request descriptions? And trying to remember the changes you made last week? Git help!
 
 ## Features
