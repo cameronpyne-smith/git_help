@@ -4,11 +4,11 @@ Never write a commit message again!
 
 Tired of writing pull request descriptions? And trying to remember the changes you made last week? Git help!
 
-## Features
-### Commit
+## 🚀 Features
+**Commit**
 Get AI to write a commit message for you, based on the changes.
 
-### PR
+**PR**
 Generate a commit message, write a PR title and description and open the PR in the browser, all with one command.
 
 ## Installation
