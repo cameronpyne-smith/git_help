@@ -54,6 +54,6 @@ git_help commit-ai
 # Push and open the PR page in your browser
 git_help pr
 
-# Commit, push, and create a PR with AI-generated title and description
+# Commit changes with AI-generated commit message, push, create a PR with AI-generated title and description and open the PR page in your browser
 git_help pr-ai
 ```
