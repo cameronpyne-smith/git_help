@@ -15,7 +15,8 @@ Download the latest binary from the [Releases](https://github.com/cameronpyne-sm
 
 ## Configuration
 
-Create a `.env` file in the project root (or set environment variables directly):
+Create a `.env.git_help` file in the same location as the executable, or in the current working directory that you will run the command, 
+this will take precedence over the base if it exists:
 
 ```env
 # AI provider: "google" or "openai"
