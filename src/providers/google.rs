@@ -1,4 +1,3 @@
-use dotenv::dotenv;
 use std::env;
 use std::process::exit;
 
@@ -38,8 +37,6 @@ impl CommitMessageGenerator for GoogleProvider {
 }
 
 fn call_api(prompt: &str) -> String {
-    dotenv().ok();
-
     let api_key = env::var("GOOGLE_API_KEY").unwrap_or_else(|_| {
         eprintln!("Error: GOOGLE_API_KEY environment variable not set.");
         eprintln!("Get a free key at https://aistudio.google.com/apikey");

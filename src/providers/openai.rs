@@ -1,4 +1,3 @@
-use dotenv::dotenv;
 use std::env;
 use std::process::exit;
 
@@ -30,8 +29,6 @@ impl CommitMessageGenerator for OpenAIProvider {
 }
 
 fn call_api(system_prompt: &str, user_content: &str) -> String {
-    dotenv().ok();
-
     let api_key = env::var("OPEN_AI_API_KEY").unwrap_or_else(|_| {
         eprintln!("Error: OPENAI_API_KEY environment variable not set.");
         eprintln!("Get a key at https://platform.openai.com/api-keys");

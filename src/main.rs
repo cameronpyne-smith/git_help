@@ -1,12 +1,15 @@
 mod providers;
 
 use std::env;
+use std::path::PathBuf;
 use std::process::exit;
 use std::process::{Command, Output};
 
 use crate::providers::get_provider;
 
 fn main() {
+    load_env();
+
     let args: Vec<String> = env::args().collect();
 
     if args.len() < 2 {
@@ -25,6 +28,28 @@ fn main() {
             exit(1);
         }
     }
+}
+
+fn load_env() {
+    let filename = ".env.git_help";
+
+    let cwd_path = PathBuf::from(filename);
+    if cwd_path.exists() {
+        dotenv::from_path(&cwd_path).ok();
+        return;
+    }
+
+    if let Ok(exe_path) = env::current_exe() {
+        if let Some(exe_dir) = exe_path.parent() {
+            let exe_env_path = exe_dir.join(filename);
+            if exe_env_path.exists() {
+                dotenv::from_path(&exe_env_path).ok();
+                return;
+            }
+        }
+    }
+
+    eprintln!("No settings file {} found", filename);
 }
 
 fn print_usage() {
@@ -109,8 +134,6 @@ fn pull_request() {
 }
 
 fn pull_request_ai() {
-    dotenv::dotenv().ok();
-
     let branch = get_current_branch();
 
     if branch == "main" || branch == "master" {
