@@ -1,3 +1,4 @@
+mod diff_processor;
 mod providers;
 
 use std::env;
@@ -98,7 +99,7 @@ fn commit(args: &[String]) {
 }
 
 fn commit_ai_message() {
-    let diff = git_diff();
+    let diff = diff_processor::preprocess_diff(&[]);
     let provider = get_provider();
     let message = provider.generate_commit_message(&diff);
     git_add_all();
@@ -164,7 +165,7 @@ fn pull_request_ai() {
 
     let repo = get_github_repo();
 
-    let all_changes = git_diff_origin_main();
+    let all_changes = diff_processor::preprocess_diff(&["origin/main"]);
     if all_changes.is_empty() {
         eprintln!("No changes from origin/main");
         exit(1);
